@@ -9,7 +9,9 @@
         android:calendarViewShown="false"
         android:datePickerMode="spinner"
         android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        android:scaleX="0.7"
+        android:scaleY="0.7" />
 
     <TimePicker
         android:layout_width="wrap_content"
@@ -18,7 +20,10 @@
         android:timePickerMode="spinner"
         android:layout_below="@+id/datePicker"
         android:layout_alignLeft="@+id/datePicker"
-        android:layout_alignStart="@+id/datePicker" />
+        android:layout_alignStart="@+id/datePicker"
+        android:scaleX="0.7"
+        android:scaleY="0.7"/>
+
 
     <TextView
         android:layout_width="wrap_content"
@@ -29,10 +34,10 @@
         android:textStyle="bold"
         android:textIsSelectable="true"
         android:textSize="50dp"
+        android:layout_marginTop="19dp"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="75dp" />
+        android:layout_alignRight="@+id/textView3"
+        android:layout_alignEnd="@+id/textView3" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -42,7 +47,8 @@
         android:id="@+id/textView2"
         android:textSize="50dp"
         android:textStyle="bold"
-        android:layout_centerVertical="true"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/datePicker"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -65,7 +71,8 @@
         android:layout_toRightOf="@+id/textView2"
         android:layout_alignRight="@+id/timePicker"
         android:layout_alignEnd="@+id/timePicker"
-        android:maxLines="5" />
+        android:maxLines="1"
+        android:singleLine="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -75,7 +82,9 @@
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/editText"
         android:layout_alignEnd="@+id/editText"
-        android:layout_marginBottom="63dp"/>
+        android:layout_marginBottom="63dp"
+        android:layout_alignParentEnd="false"
+        android:onClick="saveNewEvent" />
 
     <Button
         android:layout_width="wrap_content"

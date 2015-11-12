@@ -9,11 +9,6 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_main" tools:context=".MainActivity">
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/hello_world" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,10 +33,17 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/hello_world"
         android:layout_alignRight="@+id/button"
         android:layout_alignEnd="@+id/button"
         android:layout_marginRight="13dp"
         android:layout_marginEnd="13dp"
         android:layout_marginTop="95dp"></LinearLayout>
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/button" />
 </RelativeLayout>
