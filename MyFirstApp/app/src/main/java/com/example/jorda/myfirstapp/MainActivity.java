@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
     public String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MediTAKE";
     private String urlPath = "http://courses.ics.hawaii.edu/ics321f15/schedule";
-    private Timer timer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,11 +63,16 @@ public class MainActivity extends AppCompatActivity {
 
         MyTask newTask = new MyTask();
         newTask.execute(urlPath);
-        loadFile();
 
-        MyTimeTask newTimeTask = new MyTimeTask();
-        timer = new Timer();
-        timer.schedule(newTimeTask, 1000, 10000);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                MyTask reloadTask = new MyTask();
+                reloadTask.execute("http://courses.ics.hawaii.edu/ics321f15/schedule");
+                loadFile();
+            }
+        }, 0, 60000);
 
     }
 
@@ -89,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
     {
         DatePicker datepicker = (DatePicker)findViewById(R.id.datePicker);
         TimePicker timepicker = (TimePicker)findViewById(R.id.timePicker);
-        EditText description = (EditText)findViewById(R.id.editText);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         Calendar c = Calendar.getInstance();
         String inputDateString = datepicker.getYear() + "/" + (datepicker.getMonth() + 1) + "/" + datepicker.getDayOfMonth();
@@ -103,15 +106,7 @@ public class MainActivity extends AppCompatActivity {
                     FileWriter fw = new FileWriter(path + "saveFile.txt", true);
                     BufferedWriter bf = new BufferedWriter(fw);
                     bf.write(inputDateString);
-                    bf.write("|" + inputTimeString);
-                    if(description.getText().length() == 0)
-                    {
-                        bf.write("|" + "No description" + "|\n");
-
-                    }else
-                    {
-                        bf.write("|" + description.getText() + "|\n");
-                    }
+                    bf.write("|" + inputTimeString + "\n");
                     bf.close();
                     setContentView(R.layout.activity_main);
                     loadFile();
@@ -132,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void loadFile()
+    public void loadFile()
     {
         String line = "";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -149,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 Date today = dateFormat.parse(dateFormat.format(c.getTime()));
                 if(date.compareTo(today) >= 1)
                 {
-                    listArray.add(lineArray[0] + "\n" +lineArray[1] + "\n" +lineArray[2]);
+                    listArray.add(lineArray[0] + "\n" +lineArray[1]);
                 }
             }
 
@@ -160,14 +155,16 @@ public class MainActivity extends AppCompatActivity {
                 Date today = dateFormat.parse(dateFormat.format(c.getTime()));
                 if(date.compareTo(today) >= 1)
                 {
-                    listArray.add(lineArray[0] + "\n" + lineArray[1] + "\n" + lineArray[2]);
+                    listArray.add(lineArray[0] + "\n" + lineArray[1]);
                 }
+
             }
             ListAdapter adapterLine = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listArray);
             lv.setAdapter(adapterLine);
 
             URLbr.close();
             br.close();
+
         } catch (java.io.IOException e) {
             File fl = new File(path + "saveFile.txt");
         } catch (ParseException e) {
@@ -176,11 +173,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-//    public void onButtonTap(View v)
-//    {
-//        Toast myToast = Toast.makeText(getApplicationContext(), "Keep Doing it", Toast.LENGTH_LONG);
-//        myToast.show();
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -205,28 +197,15 @@ public class MainActivity extends AppCompatActivity {
     }
 }
 
-class MyTimeTask extends TimerTask
-{
-
-    @Override
-    public void run() {
-        MyTask reloadTask = new MyTask();
-        reloadTask.execute("http://courses.ics.hawaii.edu/ics321f15/schedule");
-    }
-}
-
-//Notification is not working yet
-//class pushNotificationTime extends TimerTask
+//class MyTimeTask extends TimerTask
 //{
-//    public static NotificationCompat.Builder notification;
+//
 //    @Override
 //    public void run() {
-//        notification.setWhen(System.currentTimeMillis());
-//        notification.setTicker("This is the ticker");
-//        notification.setContentTitle("This is title");
-//        notification.setContentText("The body text");
-//
-//
+//        MyTask reloadTask = new MyTask();
+//        reloadTask.execute("http://courses.ics.hawaii.edu/ics321f15/schedule");
+//        MainActivity mainActivity = new MainActivity();
+//        mainActivity.loadFile();
 //    }
 //}
 
@@ -238,7 +217,7 @@ class MyTask extends AsyncTask<String, Void, Boolean>
         URL url = null;
         HttpURLConnection connection = null;
         String line = "";
-
+        int count = 0;
         try {
             url = new URL(params[0]);
             connection = (HttpURLConnection) url.openConnection();
@@ -271,29 +250,9 @@ class MyTask extends AsyncTask<String, Void, Boolean>
                         date[1] = date[1].replace("Oct", "10");
                         date[1] = date[1].replace("Nov", "11");
                         date[1] = date[1].replace("Dec", "12");
-                        bw.write("2015/" + date[1] + "/" + date[2] + "|" + "8:00|");
-                        br.readLine();
-                        br.readLine();
+                        bw.write("2015/" + date[1] + "/" + date[2] + "|" + "8:00|\n");
 
-                        String temp = br.readLine();
-                        if(temp.contains("<a"))
-                        {
-                            String[] descriptionArray = temp.split(">");
-                            String description = "";
-                            if (descriptionArray.length >= 2)
-                            {
-                                description = descriptionArray[1].replace("</a", "");
-                            }
-                            bw.write(description + "|\n");
-                        }else
-                        {
-                            temp = temp.replaceAll("\\s{2,}", "");
-                            if(temp == "")
-                            {
-                                temp = "No description";
-                            }
-                            bw.write(temp + "|\n");
-                        }
+                        count++;
                     }
                 }
                 bw.close();
@@ -317,7 +276,7 @@ class MyTask extends AsyncTask<String, Void, Boolean>
 
         }
 
-
+        Log.d("MyApp", count + "");
         return successful;
     }
 }
