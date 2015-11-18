@@ -2,6 +2,8 @@ package com.example.jorda.myfirstapp;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.appwidget.AppWidgetManager;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     public String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MediTAKE";
     private String urlPath = "http://courses.ics.hawaii.edu/ics321f15/schedule";
+    public static List<Date> dateList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,11 +72,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 MyTask reloadTask = new MyTask();
-                reloadTask.execute("http://courses.ics.hawaii.edu/ics321f15/schedule");
-                loadFile();
+                reloadTask.execute(urlPath);
             }
-        }, 0, 60000);
+        }, 0, 300000);
 
+        this.loadFile();
+    }
+
+    private void setSchedule()
+    {
+        int yearTakeOut = 1900;
+        Timer timer = new Timer();
+        while(!dateList.isEmpty()) {
+            Date newDate = dateList.remove(0);
+            timer.schedule(new TimerTask() {
+
+                @Override
+                public void run() {
+                    Intent intentSendTextToWidgte = new Intent(MainActivity.this, WidgetProvider1.class);
+                    intentSendTextToWidgte.setAction(AppWidgetManager.EXTRA_CUSTOM_EXTRAS);
+                    intentSendTextToWidgte.putExtra("TIMEISUP", "TIMEISUP");
+                    sendBroadcast(intentSendTextToWidgte);
+                }
+            }, newDate);
+        }
     }
 
     public void onAddEvent(View v)
@@ -129,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadFile()
     {
+        dateList = new ArrayList<Date>();
         String line = "";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         Calendar c = Calendar.getInstance();
@@ -145,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 if(date.compareTo(today) >= 1)
                 {
                     listArray.add(lineArray[0] + "\n" +lineArray[1]);
+                    dateList.add(date);
                 }
             }
 
@@ -156,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 if(date.compareTo(today) >= 1)
                 {
                     listArray.add(lineArray[0] + "\n" + lineArray[1]);
+                    dateList.add(date);
                 }
 
             }
@@ -171,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-
+        this.setSchedule();
     }
 
     @Override
@@ -196,18 +221,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
-
-//class MyTimeTask extends TimerTask
-//{
-//
-//    @Override
-//    public void run() {
-//        MyTask reloadTask = new MyTask();
-//        reloadTask.execute("http://courses.ics.hawaii.edu/ics321f15/schedule");
-//        MainActivity mainActivity = new MainActivity();
-//        mainActivity.loadFile();
-//    }
-//}
 
 class MyTask extends AsyncTask<String, Void, Boolean>
 {
@@ -276,7 +289,6 @@ class MyTask extends AsyncTask<String, Void, Boolean>
 
         }
 
-        Log.d("MyApp", count + "");
         return successful;
     }
 }

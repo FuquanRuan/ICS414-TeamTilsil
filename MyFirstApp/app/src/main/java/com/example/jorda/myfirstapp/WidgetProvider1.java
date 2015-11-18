@@ -31,6 +31,7 @@ public class WidgetProvider1 extends AppWidgetProvider{
             Intent intent = new Intent(context, WidgetProvider1.class);
             intent.setAction(ACTION_WIDGET_REFRESH);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+            remoteViews.setImageViewResource(R.id.imageView, 0);
             remoteViews.setOnClickPendingIntent(R.id.imageView, pendingIntent);
             appWidgetManager.updateAppWidget(appWidgetIds[i], remoteViews);
         }
@@ -43,23 +44,7 @@ public class WidgetProvider1 extends AppWidgetProvider{
         ComponentName thisAppWidget = new ComponentName(context.getPackageName(), WidgetProvider1.class.getName());
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
 
-//        if(imageView.getVisibility() == View.VISIBLE) {
-//            for (int i = 0; i < appWidgetIds.length; i++) {
-//                RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-//                imageView.setVisibility(View.INVISIBLE);
-//                appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
-//            }
-//        }
-
-        if(intent.getAction().equals(ACTION_WIDGET_REFRESH) && pillAppear == false)
-        {
-            for(int i = 0; i < appWidgetIds.length; i++) {
-                RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-                remoteViews.setImageViewResource(R.id.imageView, R.drawable.pill);
-                appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
-                pillAppear = true;
-            }
-        }else if(pillAppear == true)
+        if(intent.getAction().equals(ACTION_WIDGET_REFRESH) && pillAppear == true)
         {
             for(int i = 0; i < appWidgetIds.length; i++) {
                 RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
@@ -69,6 +54,15 @@ public class WidgetProvider1 extends AppWidgetProvider{
             }
         }
 
+        if(intent.hasExtra("TIMEISUP"))
+        {
+            for(int i = 0; i < appWidgetIds.length; i++) {
+                RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
+                remoteViews.setImageViewResource(R.id.imageView, R.drawable.pill);
+                appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
+                pillAppear = true;
+            }
+        }
 
 
     }
