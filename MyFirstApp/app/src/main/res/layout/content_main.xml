@@ -27,7 +27,8 @@
         android:id="@+id/button2"
         android:layout_alignTop="@+id/button"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:onClick="loadURLdata" />
 
     <LinearLayout
         android:orientation="vertical"

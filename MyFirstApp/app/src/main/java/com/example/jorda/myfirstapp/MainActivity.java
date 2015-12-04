@@ -3,9 +3,11 @@ package com.example.jorda.myfirstapp;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.appwidget.AppWidgetManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.renderscript.ScriptGroup;
 import android.support.design.widget.FloatingActionButton;
@@ -14,15 +16,19 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -57,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     public String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MediTAKE";
     private String urlPath = "http://courses.ics.hawaii.edu/ics321f15/schedule";
     public static List<Date> dateList;
+    public static int countSchedule = 0;
+    public Timer timer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,29 +72,23 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        MyTask newTask = new MyTask();
-        newTask.execute(urlPath);
-
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                MyTask reloadTask = new MyTask();
-                reloadTask.execute(urlPath);
-            }
-        }, 0, 300000);
-
         this.loadFile();
     }
 
     private void setSchedule()
     {
+        while(countSchedule > 0)
+        {
+            timer.cancel();
+            timer.purge();
+            countSchedule--;
+        }
+        timer = new Timer();
         int yearTakeOut = 1900;
-        Timer timer = new Timer();
         while(!dateList.isEmpty()) {
+            countSchedule++;
             Date newDate = dateList.remove(0);
             timer.schedule(new TimerTask() {
-
                 @Override
                 public void run() {
                     Intent intentSendTextToWidgte = new Intent(MainActivity.this, WidgetProvider1.class);
@@ -184,20 +186,44 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
-            ListAdapter adapterLine = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listArray);
-            lv.setAdapter(adapterLine);
+//            ListAdapter adapterLine = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listArray);
+            lv.setAdapter(new MyListAdaper(this, R.layout.list_item, listArray));
 
             URLbr.close();
             br.close();
 
         } catch (java.io.IOException e) {
             File fl = new File(path + "saveFile.txt");
+            if(!fl.exists())
+            {
+                try {
+                    fl.createNewFile();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
         this.setSchedule();
     }
+
+    public void loadURLdata(View v)
+    {
+        MyTask newTask = new MyTask();
+        newTask.execute(urlPath);
+        while(newTask.isFinish() == false)
+        {
+            Log.i("Background", "Background still running");
+        }
+        int count = newTask.glCount;
+        loadFile();
+        Toast myToast = Toast.makeText(getApplicationContext(), "Loaded " + count + " reminders!", Toast.LENGTH_LONG);
+        myToast.show();
+        newTask.setIsFinish(false);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -220,12 +246,122 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public boolean removeDate(String selectedStr)
+    {
+        boolean isRemove = false;
+        List<String> localData = new ArrayList<String>();
+        List<String> urlData = new ArrayList<String>();
+
+        String line = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path + "saveFile.txt"));
+            BufferedReader URLbr = new BufferedReader(new FileReader(path + "_URL_File.txt"));
+            while((line = br.readLine()) != null)
+            {
+                if(!line.contains(selectedStr))
+                {
+                    localData.add(line);
+                }
+            }
+
+            while((line = URLbr.readLine()) != null)
+            {
+                if(!line.contains(selectedStr))
+                {
+                    urlData.add(line);
+                }
+            }
+
+            URLbr.close();
+            br.close();
+
+            FileWriter fw = new FileWriter(path + "saveFile.txt");
+            BufferedWriter bf = new BufferedWriter(fw);
+            while(!localData.isEmpty())
+            {
+                String temp = localData.remove(0);
+                bf.write(temp + "\n");
+                Log.i("removelocal", temp);
+            }
+            bf.close();
+
+            FileWriter urlFw = new FileWriter(path + "_URL_File.txt");
+            BufferedWriter urlBf = new BufferedWriter(urlFw);
+            while(!urlData.isEmpty())
+            {
+                String temp = urlData.remove(0);
+                urlBf.write(temp + "\n");
+                Log.i("removeURL", temp);
+            }
+            urlBf.close();
+            isRemove = true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return isRemove;
+    }
+
+    private class MyListAdaper extends ArrayAdapter<String>
+    {
+        private int layout;
+        public MyListAdaper(Context context, int resource, List<String> objects) {
+            super(context, resource, objects);
+            layout = resource;
+        }
+
+        @Override
+        public  View getView(int position, View convertView, ViewGroup parent)
+        {
+            ViewHolder mainViewHolder = null;
+            if(convertView == null)
+            {
+                LayoutInflater inflater = LayoutInflater.from(getContext());
+                convertView = inflater.inflate(layout, parent, false);
+                final ViewHolder viewHolder = new ViewHolder();
+                viewHolder.title = (TextView) convertView.findViewById(R.id.list_item_text);
+                viewHolder.button = (Button) convertView.findViewById(R.id.list_item_removeBtn);
+                viewHolder.button.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        String selectedStr = (String) viewHolder.title.getText();
+                        selectedStr = selectedStr.replace("\n", "|");
+                        Log.i("selected", selectedStr);
+                        removeDate(selectedStr);
+                        loadFile();
+                    }
+                });
+                convertView.setTag(viewHolder);
+
+            }
+                mainViewHolder = (ViewHolder) convertView.getTag();
+                mainViewHolder.title.setText(getItem(position).toString());
+
+            return convertView;
+        }
+    }
+
+    public class ViewHolder
+    {
+        TextView title;
+        Button button;
+    }
 }
 
 class MyTask extends AsyncTask<String, Void, Boolean>
 {
+    public static int glCount;
+    public static boolean isFinish;
     @Override
     protected Boolean doInBackground(String... params) {
+        isFinish = false;
+        glCount = 0;
         boolean successful = false;
         URL url = null;
         HttpURLConnection connection = null;
@@ -263,15 +399,23 @@ class MyTask extends AsyncTask<String, Void, Boolean>
                         date[1] = date[1].replace("Oct", "10");
                         date[1] = date[1].replace("Nov", "11");
                         date[1] = date[1].replace("Dec", "12");
-                        bw.write("2015/" + date[1] + "/" + date[2] + "|" + "8:00|\n");
+                        Calendar c = Calendar.getInstance();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                        Date today = dateFormat.parse(dateFormat.format(c.getTime()));
+                        Date inputDate = dateFormat.parse("2015/" + date[1] + "/" + date[2] + " " + "8:00");
+                        if(inputDate.compareTo(today) >= 1)
+                        {
+                            bw.write("2015/" + date[1] + "/" + date[2] + "|" + "8:00|\n");
+                            count++;
+                        }
 
-                        count++;
                     }
                 }
                 bw.close();
                 successful = true;
-            }
-            finally{
+            } catch (ParseException e) {
+                e.printStackTrace();
+            } finally{
                 connection.disconnect();
             }
 
@@ -288,7 +432,23 @@ class MyTask extends AsyncTask<String, Void, Boolean>
             }
 
         }
-
+        glCount = count;
+        isFinish = true;
         return successful;
+    }
+
+    public int returnCount()
+    {
+        return glCount;
+    }
+
+    public boolean isFinish()
+    {
+     return isFinish;
+    }
+
+    public void setIsFinish(boolean boolIsFinish)
+    {
+        this.isFinish = boolIsFinish;
     }
 }

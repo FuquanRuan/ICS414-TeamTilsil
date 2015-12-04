@@ -5,20 +5,31 @@
     android:id="@+id/widgetBackground"
     android:clickable="false">
 
-
-    <!--<Button-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Change"-->
-        <!--android:id="@+id/ColorButton"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:contextClickable="false"-->
-        <!--android:layout_centerVertical="true" />-->
-
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="250px"
+        android:layout_height="250px"
         android:id="@+id/imageView"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"/>
+        android:scaleType="fitCenter"
+        />
+
+    <ImageView
+        android:layout_width="250px"
+        android:layout_height="250px"
+        android:id="@+id/imageView2"
+        android:layout_centerVertical="true"
+        android:scaleType="fitCenter"
+        android:layout_marginLeft="275px"
+
+        />
+
+    <ImageView
+        android:layout_width="250px"
+        android:layout_height="250px"
+        android:id="@+id/imageView3"
+        android:layout_centerVertical="true"
+        android:scaleType="fitCenter"
+        android:layout_marginLeft="550px"
+
+        />
 </RelativeLayout>
