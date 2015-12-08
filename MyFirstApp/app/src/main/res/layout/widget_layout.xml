@@ -6,30 +6,29 @@
     android:clickable="false">
 
     <ImageView
-        android:layout_width="250px"
-        android:layout_height="250px"
+        android:layout_width="200px"
+        android:layout_height="200px"
         android:id="@+id/imageView"
         android:layout_centerVertical="true"
         android:scaleType="fitCenter"
         />
 
     <ImageView
-        android:layout_width="250px"
-        android:layout_height="250px"
+        android:layout_width="200px"
+        android:layout_height="200px"
         android:id="@+id/imageView2"
-        android:layout_centerVertical="true"
         android:scaleType="fitCenter"
-        android:layout_marginLeft="275px"
 
-        />
+        android:layout_alignTop="@+id/imageView"
+        android:layout_centerHorizontal="true" />
 
     <ImageView
-        android:layout_width="250px"
-        android:layout_height="250px"
+        android:layout_width="200px"
+        android:layout_height="200px"
         android:id="@+id/imageView3"
-        android:layout_centerVertical="true"
         android:scaleType="fitCenter"
-        android:layout_marginLeft="550px"
 
-        />
+        android:layout_alignTop="@+id/imageView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

@@ -1,6 +1,6 @@
 package com.example.jorda.myfirstapp;
 
-import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -57,6 +57,13 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
+
+import static android.app.Notification.DEFAULT_LIGHTS;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -95,6 +102,17 @@ public class MainActivity extends AppCompatActivity {
                     intentSendTextToWidgte.setAction(AppWidgetManager.EXTRA_CUSTOM_EXTRAS);
                     intentSendTextToWidgte.putExtra("TIMEISUP", "TIMEISUP");
                     sendBroadcast(intentSendTextToWidgte);
+
+                    NotificationCompat.Builder note = new NotificationCompat.Builder(MainActivity.this)
+                            .setContentTitle("MediTake")
+                            .setContentText("Take Your Medicine!")
+                            .setSmallIcon(R.drawable.pill);
+
+                    note.setDefaults(Notification.DEFAULT_ALL);
+                    note.setAutoCancel(true);
+
+                    NotificationManager mgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+                    mgr.notify(1, note.build());
                 }
             }, newDate);
         }
@@ -161,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
         List<String> listArray = new ArrayList<String>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(path + "saveFile.txt"));
-            BufferedReader URLbr = new BufferedReader(new FileReader(path + "_URL_File.txt"));
             while((line = br.readLine()) != null)
             {
                 String[] lineArray = line.split("\\|");
@@ -173,6 +190,9 @@ public class MainActivity extends AppCompatActivity {
                     dateList.add(date);
                 }
             }
+            br.close();
+
+            BufferedReader URLbr = new BufferedReader(new FileReader(path + "_URL_File.txt"));
 
             while((line = URLbr.readLine()) != null)
             {
@@ -190,7 +210,6 @@ public class MainActivity extends AppCompatActivity {
             lv.setAdapter(new MyListAdaper(this, R.layout.list_item, listArray));
 
             URLbr.close();
-            br.close();
 
         } catch (java.io.IOException e) {
             File fl = new File(path + "saveFile.txt");
