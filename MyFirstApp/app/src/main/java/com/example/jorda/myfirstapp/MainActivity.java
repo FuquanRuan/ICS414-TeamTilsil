@@ -207,8 +207,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
 //            ListAdapter adapterLine = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listArray);
-            lv.setAdapter(new MyListAdaper(this, R.layout.list_item, listArray));
-
             URLbr.close();
 
         } catch (java.io.IOException e) {
@@ -224,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
+        lv.setAdapter(new MyListAdaper(this, R.layout.list_item, listArray));
         this.setSchedule();
     }
 
@@ -274,8 +272,8 @@ public class MainActivity extends AppCompatActivity {
 
         String line = "";
         try {
+            isRemove = true;
             BufferedReader br = new BufferedReader(new FileReader(path + "saveFile.txt"));
-            BufferedReader URLbr = new BufferedReader(new FileReader(path + "_URL_File.txt"));
             while((line = br.readLine()) != null)
             {
                 if(!line.contains(selectedStr))
@@ -284,15 +282,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            while((line = URLbr.readLine()) != null)
-            {
-                if(!line.contains(selectedStr))
-                {
-                    urlData.add(line);
-                }
-            }
-
-            URLbr.close();
             br.close();
 
             FileWriter fw = new FileWriter(path + "saveFile.txt");
@@ -305,6 +294,16 @@ public class MainActivity extends AppCompatActivity {
             }
             bf.close();
 
+            BufferedReader URLbr = new BufferedReader(new FileReader(path + "_URL_File.txt"));
+            while((line = URLbr.readLine()) != null)
+            {
+                if(!line.contains(selectedStr))
+                {
+                    urlData.add(line);
+                }
+            }
+            URLbr.close();
+
             FileWriter urlFw = new FileWriter(path + "_URL_File.txt");
             BufferedWriter urlBf = new BufferedWriter(urlFw);
             while(!urlData.isEmpty())
@@ -314,7 +313,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("removeURL", temp);
             }
             urlBf.close();
-            isRemove = true;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
